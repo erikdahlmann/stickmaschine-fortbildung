@@ -1,0 +1,8 @@
+# Nur die fertigen Seiten veröffentlichen. Quellen und Planung bleiben lokal.
+/*
+!/index.html
+!/praesentation.html
+!/README.md
+!/bilder/
+!/fonts/
+!/.gitignore

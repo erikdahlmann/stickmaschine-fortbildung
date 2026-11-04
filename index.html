@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vom SVG zum Stich</title>
+<meta name="description" content="Wie eine SVG-Grafik auf die Brother Entrepreneur One PR1X kommt: typische Fehler beim Erstellen, Umwandeln und Übertragen.">
+<style>
+@font-face{font-family:"Fraunces";src:url(fonts/fraunces.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Figtree";src:url(fonts/figtree.woff2) format("woff2");font-weight:300 900;font-display:swap}
+:root{
+  --creme:#f6f0e4; --papier:#fcf8f0; --tinte:#2a2622; --mut:#6a6155; --linie:#e2d8c6;
+  --schiefer:#27465f; --schiefer-d:#1b3346; --terra:#c8553d; --terra-t:#a8432c; --salbei:#6f8f72; --salbei-t:#3f6b49;
+  --aus:cubic-bezier(.23,1,.32,1); --bewegt:cubic-bezier(.77,0,.175,1);
+  --serif:"Fraunces",Georgia,serif; --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px;-webkit-text-size-adjust:100%}
+body{background:var(--creme);color:var(--tinte);font-family:var(--sans);font-size:18px;line-height:1.6;overflow-x:hidden}
+:focus-visible{outline:3px solid var(--terra);outline-offset:3px;border-radius:4px}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+code{font-size:.92em;background:rgba(39,70,95,.09);padding:.06em .32em;border-radius:5px;font-family:ui-monospace,Menlo,monospace}
+#fort{position:fixed;inset:0 0 auto;height:5px;z-index:60;pointer-events:none}
+#fort span{display:block;height:3px;margin-top:1px;background:repeating-linear-gradient(90deg,var(--terra) 0 14px,transparent 14px 21px);clip-path:inset(0 100% 0 0)}
+
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);align-items:center;gap:32px;max-width:1280px;margin:0 auto;padding-block:48px 40px;padding-inline:28px;min-height:min(86vh,760px)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--schiefer)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(46px,7.4vw,98px);line-height:.98;letter-spacing:-.025em;color:var(--schiefer-d);margin-top:14px;font-optical-sizing:auto}
+.naht{width:min(100%,480px);height:auto;margin-top:12px;overflow:visible}
+.naht path{fill:none;stroke:var(--terra);stroke-width:4;stroke-linecap:round;stroke-dasharray:15 9}
+.lead{font-size:clamp(19px,2.1vw,23px);line-height:1.42;margin-top:20px;max-width:27em}
+.knopf{display:inline-block;margin-top:28px;background:var(--schiefer);color:#fff;text-decoration:none;font-weight:600;padding:14px 22px;border-radius:12px;transition:transform 160ms var(--aus),background-color 180ms ease}
+.knopf:active{transform:scale(.97)}
+.hero-bild img{width:100%;height:auto;border-radius:22px}
+
+nav.toc{position:sticky;top:0;z-index:50;background:rgba(246,240,228,.88);backdrop-filter:blur(10px);border-block:1px solid var(--linie)}
+nav.toc ol{list-style:none;display:flex;gap:4px;max-width:1120px;margin:0 auto;padding:7px 20px;overflow-x:auto;scrollbar-width:none}
+nav.toc a{display:block;white-space:nowrap;text-decoration:none;font-size:15px;font-weight:500;padding:7px 12px;border-radius:9px;color:var(--mut);transition:background-color 160ms ease,color 160ms ease}
+nav.toc a.an{background:var(--schiefer);color:#fff}
+
+main{overflow:clip}
+.ab{max-width:1120px;margin:0 auto;padding-block:84px 20px;padding-inline:28px}
+h2{font-family:var(--serif);font-weight:600;font-size:clamp(34px,4.8vw,58px);line-height:1.04;letter-spacing:-.018em;color:var(--schiefer-d);margin-bottom:16px}
+h3{font-size:20px;line-height:1.25;font-weight:700;color:var(--schiefer-d)}
+.breit{max-width:44em;font-size:20px;line-height:1.5;margin-top:14px}
+.kopf{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.kopf p{font-size:20px;line-height:1.5}
+.kopf.umgekehrt{grid-template-columns:1fr 1fr}
+.bild img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:18px}
+.breitbild{margin-top:32px}.breitbild img{aspect-ratio:21/8;object-fit:cover;object-position:center 60%}
+
+.weg{position:relative;margin-top:38px}
+.weg-faden{position:absolute;left:0;right:0;top:50px;width:100%;height:20px;overflow:visible}
+.weg-faden path{fill:none;stroke:var(--terra);stroke-width:3;stroke-dasharray:15 9;vector-effect:non-scaling-stroke}
+.weg ol{position:relative;list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.weg a{display:block;text-align:center;text-decoration:none;padding:6px;border-radius:14px;transition:transform 160ms var(--aus)}
+.weg a:active{transform:scale(.97)}
+.dat{display:grid;place-items:center;width:104px;height:104px;margin:0 auto 12px;background:var(--papier);border-radius:50%;font-family:ui-monospace,Menlo,monospace;font-weight:600;font-size:19px;color:var(--schiefer);box-shadow:0 0 0 7px var(--creme),inset 0 0 0 2px var(--schiefer),inset 0 0 0 6px var(--papier),inset 0 0 0 7.5px var(--linie)}
+.weg b{display:block;font-size:18px;line-height:1.25}
+.weg small{display:block;font-size:15px;color:var(--mut);margin-top:2px}
+
+.probleme{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:40px}
+.pk{display:grid;grid-template-columns:172px 1fr;gap:18px;background:var(--papier);border-radius:18px;padding:18px;box-shadow:0 0 0 1px var(--linie)}
+.pk-bild{position:relative}
+.pk-bild svg{width:100%;height:auto;background:#fff;border-radius:12px;box-shadow:0 0 0 1px var(--linie)}
+.st-bad,.st-good{transition:opacity 220ms ease,filter 220ms ease}
+.pk[data-state=bad] .st-good,.pk[data-state=good] .st-bad{opacity:0;filter:blur(3px)}
+.schalter{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:8px;background:var(--creme);border-radius:9px;padding:2px}
+.schalter button{font:600 13px/1 var(--sans);min-height:34px;border:0;border-radius:7px;background:transparent;color:var(--mut);cursor:pointer;transition:background-color 160ms ease,color 160ms ease,transform 160ms var(--aus)}
+.schalter button:active{transform:scale(.97)}
+.schalter button[aria-pressed=true][data-v=bad]{background:var(--terra-t);color:#fff}
+.schalter button[aria-pressed=true][data-v=good]{background:var(--salbei-t);color:#fff}
+.pk-text h3{margin-bottom:6px;font-size:19px}
+.pk-text p{font-size:16px;line-height:1.48}
+.kl{margin-top:48px}
+.check{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px;max-width:900px}
+.check label{display:flex;gap:12px;align-items:flex-start;min-height:48px;padding:12px;border-radius:12px;background:var(--papier);box-shadow:0 0 0 1px var(--linie);cursor:pointer;font-size:16px;line-height:1.35}
+.check input{appearance:none;flex:none;width:22px;height:22px;border-radius:50%;border:2px dashed var(--terra);background:#fff;display:grid;place-items:center;cursor:pointer;transition:background-color 160ms ease,border-color 160ms ease}
+.check input::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(40deg) scale(.7);opacity:0;transition:transform 180ms var(--aus),opacity 120ms ease}
+.check input:checked{background:var(--salbei-t);border:2px solid var(--salbei-t)}
+.check input:checked::after{opacity:1;transform:translateY(-1px) rotate(40deg) scale(1)}
+.klein{font:600 14px/1 var(--sans);min-height:40px;margin-top:12px;padding:0 14px;border:1px solid var(--linie);border-radius:10px;background:transparent;color:var(--schiefer);cursor:pointer;transition:transform 160ms var(--aus)}
+.klein:active{transform:scale(.97)}
+
+.dunkel{max-width:none;background:var(--schiefer-d);color:#eef0ea;margin-top:84px;padding-block:84px;padding-inline:max(28px,calc((100vw - 1064px)/2))}
+.dunkel h2{color:#fff}
+.demo{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:center;margin-block:32px;background:rgba(255,255,255,.06);border-radius:20px;padding:20px}
+.demo-feld{background:var(--creme);border-radius:14px;overflow:hidden}
+#demo-svg{width:100%;height:auto}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;background:rgba(255,255,255,.1);border-radius:11px;padding:3px}
+.seg button{font:600 15px/1 var(--sans);min-height:42px;border:0;background:transparent;border-radius:9px;color:#dfe4dd;cursor:pointer;transition:background-color 160ms ease,color 160ms ease,transform 160ms var(--aus)}
+.seg button:active{transform:scale(.97)}
+.seg button[aria-pressed=true]{background:var(--creme);color:var(--schiefer-d)}
+#demo-text{font-size:17px;line-height:1.45;margin-block:14px;min-height:5.8em}
+.klein.hell{color:#fff;border-color:rgba(255,255,255,.3)}
+.tabs{margin-top:36px;background:var(--papier);color:var(--tinte);border-radius:20px;padding:10px 10px 24px}
+.tabliste{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--creme);border-radius:12px;padding:3px}
+.tabmarke{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);background:var(--schiefer);border-radius:10px;transition:transform 240ms var(--bewegt)}
+[role=tab]{position:relative;font:700 16px/1 var(--sans);min-height:46px;background:none;border:0;border-radius:10px;cursor:pointer;color:var(--mut);transition:color 200ms ease}
+[role=tab][aria-selected=true]{color:#fff}
+.tabfeld{padding:20px 16px 0}
+.warn{font-size:17px;line-height:1.48;max-width:48em;padding-left:14px;border-left:3px solid var(--terra)}
+.zahl{list-style:none;counter-reset:z;margin-top:18px;max-width:50em}
+.zahl li{counter-increment:z;position:relative;padding:9px 0 9px 44px;font-size:17px;line-height:1.45;border-bottom:1px dashed var(--linie)}
+.zahl li::before{content:counter(z);position:absolute;left:0;top:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--schiefer);color:#fff;font-size:14px;font-weight:700}
+.fuss{font-size:15px;line-height:1.45;color:var(--mut);margin-top:14px;padding-inline:16px;max-width:60em}
+.tabfeld .fuss{padding-inline:0}
+
+.flug{position:relative;display:flex;align-items:center;gap:12px;margin-top:24px;height:58px}
+.flug-datei{font:600 14px/1 ui-monospace,Menlo,monospace;background:#fff;box-shadow:0 0 0 1px var(--linie);border-radius:8px;padding:10px 12px;color:var(--schiefer)}
+.flug-stick{position:relative;width:96px;height:38px;background:var(--schiefer);border-radius:7px 12px 12px 7px}
+.flug-stick i{position:absolute;right:100%;top:9px;width:18px;height:20px;background:#a6adb3;border-radius:3px 0 0 3px}
+.flug-ok{font-size:15px;font-weight:700;color:var(--salbei-t);opacity:0}
+.regeln{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px}
+.regeln > div{background:var(--papier);box-shadow:0 0 0 1px var(--linie);border-radius:18px;padding:22px}
+.regeln ul{margin-top:10px;padding-left:1.1em}
+.regeln li{font-size:16.500px;line-height:1.45;margin-top:8px}
+.regeln li::marker{color:var(--terra)}
+
+.ablauf{list-style:none;counter-reset:a;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:36px}
+.ablauf li{counter-increment:a;background:var(--papier);box-shadow:0 0 0 1px var(--linie);border-radius:16px;padding:16px;font-size:15.500px;line-height:1.42}
+.ablauf li::before{content:counter(a);display:block;font-family:var(--serif);font-size:34px;font-weight:600;line-height:1;margin-bottom:8px;color:var(--terra-t)}
+.schema{margin-top:18px}
+.schema summary{cursor:pointer;font-weight:600;color:var(--schiefer);min-height:44px;display:flex;align-items:center}
+.schema-bild{background:#fff;border-radius:16px;padding:14px;box-shadow:0 0 0 1px var(--linie)}
+.schema-bild svg{width:100%;height:auto}
+
+.fehler{margin-top:32px;max-width:860px}
+.fehler h3{margin-top:28px;margin-bottom:8px}
+.ak{border-top:1px solid var(--linie)}
+.ak > button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;min-height:54px;padding:12px 2px;font:600 17px/1.25 var(--sans);text-align:left;color:var(--tinte);background:none;border:0;border-top:1px solid var(--linie);cursor:pointer}
+.ak > button:first-child{border-top:0}
+.ak > button::after{content:"";flex:none;width:11px;height:11px;border:solid var(--terra);border-width:0 2.5px 2.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform 200ms var(--aus)}
+.ak > button[aria-expanded=true]::after{transform:translateY(2px) rotate(225deg)}
+.ak > div{display:grid;grid-template-rows:0fr;transition:grid-template-rows 220ms var(--aus)}
+.ak > button[aria-expanded=true] + div{grid-template-rows:1fr}
+.ak > div > div{overflow:hidden;min-height:0;visibility:hidden;transition:visibility 220ms}
+.ak > button[aria-expanded=true] + div > div{visibility:visible}
+.ak p{padding-bottom:14px;font-size:16.500px;line-height:1.5;max-width:44em}
+
+.quellen{columns:2;column-gap:30px;margin-top:20px;padding-left:1.1em;font-size:15.500px}
+.quellen li{break-inside:avoid;margin-bottom:7px}
+footer{max-width:1120px;margin:64px auto 0;padding:24px 28px 56px;border-top:2px dashed var(--linie);font-size:14px;color:var(--mut)}
+
+/* Bewegung: nur wenn JS läuft, sonst bleibt alles sichtbar. */
+@media (prefers-reduced-motion:no-preference){
+  html.js:not(.noanim) .naht{animation:naht 1500ms linear 300ms backwards}
+  html.js:not(.noanim) .hero-bild{animation:ein 700ms var(--aus) backwards}
+  html.js:not(.noanim) [data-r]{opacity:0;transform:translateY(12px);transition:opacity 500ms var(--aus),transform 500ms var(--aus);transition-delay:calc(var(--i,0)*50ms)}
+  html.js:not(.noanim) [data-r].da{opacity:1;transform:none}
+  html.js:not(.noanim) [data-bild] img{clip-path:inset(0 0 100% 0 round 18px);transition:clip-path 800ms var(--bewegt)}
+  html.js:not(.noanim) [data-bild].da img{clip-path:inset(0 0 0 0 round 18px)}
+  html.js:not(.noanim) .weg-faden{clip-path:inset(-10px 100% -10px 0);transition:clip-path 1600ms linear}
+  html.js:not(.noanim) .weg.da .weg-faden{clip-path:inset(-10px 0 -10px 0)}
+  html.js:not(.noanim) .weg li{opacity:0;transform:scale(.95);transition:opacity 400ms var(--aus),transform 400ms var(--aus);transition-delay:calc(var(--i)*420ms)}
+  html.js:not(.noanim) .weg.da li{opacity:1;transform:none}
+  html.js:not(.noanim) .flug.da .flug-datei{animation:flieg 1300ms var(--bewegt) 300ms forwards}
+  html.js:not(.noanim) .flug.da .flug-ok{animation:einblend 300ms ease 1500ms forwards}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.flug-ok{opacity:1}.flug-datei{opacity:.45}}
+html:not(.js) .flug-ok{opacity:1}
+@keyframes naht{from{clip-path:inset(-8px 100% -8px 0)}to{clip-path:inset(-8px 0 -8px 0)}}
+@keyframes ein{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
+@keyframes flieg{to{transform:translateX(138px) scale(.72);opacity:0}}
+@keyframes einblend{to{opacity:1}}
+@media (hover:hover) and (pointer:fine){
+  .knopf:hover{background:var(--schiefer-d)}
+  nav.toc a:not(.an):hover{background:rgba(39,70,95,.09);color:var(--schiefer-d)}
+  .weg a:hover .dat{box-shadow:0 0 0 7px var(--creme),inset 0 0 0 2px var(--terra),inset 0 0 0 6px var(--papier),inset 0 0 0 7.5px var(--linie)}
+  .ak > button:hover{color:var(--terra-t)}
+}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;min-height:0;padding-block:32px 28px;padding-inline:18px}
+  .hero-bild{grid-row:1}
+  .ab{padding-inline:18px;padding-block:60px 12px}
+  .dunkel{padding-inline:18px;padding-block:60px;margin-top:60px}
+  .kopf,.kopf.umgekehrt{grid-template-columns:1fr;gap:22px}.kopf.umgekehrt .bild{order:2}
+  .probleme,.regeln,.check,.demo{grid-template-columns:1fr}
+  .demo{padding:10px}#demo-text{min-height:0}
+  .ablauf{grid-template-columns:1fr}.ablauf li{display:grid;grid-template-columns:42px 1fr;align-items:baseline}.ablauf li::before{margin:0}
+  .weg ol{grid-template-columns:repeat(2,1fr);row-gap:24px}.weg-faden{display:none}
+  .dat{width:84px;height:84px;font-size:16px}
+  .quellen{columns:1}.breit,.kopf p{font-size:18px}
+  .schema-bild{overflow-x:auto}.schema-bild svg{min-width:640px}
+  .breitbild img{aspect-ratio:3/2}
+}
+@media (max-width:520px){.pk{grid-template-columns:1fr}.pk-bild{max-width:260px}}
+@media print{
+  #fort,nav.toc,.knopf,.klein,.schalter,.flug,.demo,.weg-faden{display:none!important}
+  body{background:#fff;font-size:11pt}.dunkel{background:#fff;color:#000;padding:0}.dunkel h2{color:#000}
+  [data-r],[data-bild] img,.weg li{opacity:1!important;transform:none!important;clip-path:none!important}
+  .st-bad{display:none}.st-good{opacity:1!important;filter:none!important}
+  .ak > div{grid-template-rows:1fr}.ak > div > div{visibility:visible}
+  [role=tabpanel]{display:block!important}[role=tablist]{display:none}
+  .pk,.regeln > div,.ablauf li{break-inside:avoid}
+}
+
+</style>
+<script>document.documentElement.className+=" js";</script>
+</head>
+<body>
+<div id="fort" aria-hidden="true"><span></span></div>
+
+<header class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Fortbildung Brother Entrepreneur One (PR1X)</p>
+    <h1>Vom SVG zum Stich</h1>
+    <svg class="naht" viewBox="0 0 520 18" aria-hidden="true"><path d="M4 11 C90 2 170 16 260 9 S430 3 516 10"/></svg>
+    <p class="lead">Eine Vektorgrafik lässt sich nicht einfach sticken. Hier steht, woran es beim Erstellen und Übertragen meist hakt und was dann hilft.</p>
+    <a class="knopf" href="#svg">Zur Fehlerliste fürs SVG</a>
+  </div>
+  <figure class="hero-bild"><img src="bilder/01-hero.webp" width="1400" height="784" alt="Illustration einer Stickmaschine, die einen Stern in Filz stickt"></figure>
+</header>
+
+<nav class="toc" aria-label="Inhalt"><ol>
+  <li><a href="#weg">Der Weg</a></li>
+  <li><a href="#svg">SVG vorbereiten</a></li>
+  <li><a href="#datei">Stickdatei</a></li>
+  <li><a href="#usb">USB-Stick</a></li>
+  <li><a href="#maschine">Maschine</a></li>
+  <li><a href="#klemmt">Wenn es klemmt</a></li>
+  <li><a href="#quellen">Quellen</a></li>
+</ol></nav>
+
+<main>
+
+<section class="ab" id="weg">
+  <h2 data-r>Der Weg</h2>
+  <p class="breit" data-r>Die Maschine kann mit einer SVG-Datei nichts anfangen. Sie liest Stichdaten, also <code>.pes</code>, <code>.phc</code>, <code>.dst</code> und <code>.pen</code>. Eine SVG beschreibt Flächen und Linien, eine Stickdatei jeden einzelnen Einstich. Fast alle Probleme entstehen bei dieser Übersetzung.</p>
+  <div class="weg" id="wegbild">
+    <svg class="weg-faden" viewBox="0 0 1000 20" preserveAspectRatio="none" aria-hidden="true"><path d="M60 10 H940"/></svg>
+    <ol>
+      <li style="--i:0"><a href="#svg"><span class="dat">.svg</span><b>SVG vorbereiten</b><small>Schrift, Farben, Größe</small></a></li>
+      <li style="--i:1"><a href="#datei"><span class="dat">.pes</span><b>Stickdatei erzeugen</b><small>Creator oder Ink/Stitch</small></a></li>
+      <li style="--i:2"><a href="#usb"><span class="dat">USB</span><b>Auf den Stick</b><small>Format und Ablage</small></a></li>
+      <li style="--i:3"><a href="#maschine"><span class="dat">PR1X</span><b>Sticken</b><small>Erst die Probe</small></a></li>
+    </ol>
+  </div>
+</section>
+
+<section class="ab" id="svg">
+  <div class="kopf">
+    <div>
+      <h2 data-r>SVG vorbereiten</h2>
+      <p data-r>Eine Grafik, die am Bildschirm gut aussieht, kann gestickt scheitern. Diese sieben Punkte kosten am meisten Zeit. Mit dem Schalter siehst du jeweils den Unterschied.</p>
+    </div>
+    <figure class="bild" data-bild><img src="bilder/02-svg.webp" loading="lazy" width="928" height="1016" alt="Illustration einer Vektorform auf dem Laptop, davor ein Faden in derselben Form"></figure>
+  </div>
+  <div class="probleme">
+    <article class="pk" data-r data-state="bad" style="--i:0"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Text als Schriftverweis und als Pfad"><g class="st-bad"><rect x="40" y="22" width="120" height="76" rx="6" fill="none" stroke="#b4472f" stroke-width="2" stroke-dasharray="6 5"/><text x="100" y="78" font-family="Georgia,serif" font-size="54" text-anchor="middle" fill="#2a2622">Aa</text><text x="100" y="114" font-size="11" text-anchor="middle" fill="#a8432c" font-family="system-ui,sans-serif">Schriftart fehlt?</text></g><g class="st-good"><path d="M62 92 L88 28 H104 L130 92 H114 L108 76 H84 L78 92 Z M89 63 H103 L96 44 Z" fill="#27465f" fill-rule="evenodd"/><g fill="#fff" stroke="#c8553d" stroke-width="2"><rect x="58" y="88" width="8" height="8"/><rect x="84" y="24" width="8" height="8"/><rect x="100" y="24" width="8" height="8"/><rect x="126" y="88" width="8" height="8"/><rect x="110" y="88" width="8" height="8"/><rect x="74" y="88" width="8" height="8"/></g></g></svg></div><div class="pk-text"><h3>Schrift in Pfade umwandeln</h3><p>Text in einer SVG verweist nur auf eine Schriftart. Fehlt sie auf dem anderen Rechner, sieht das Motiv anders aus. In Inkscape geht das mit Pfad &gt; Objekt in Pfad umwandeln. Einfachen Text kannst du auch direkt im Stickprogramm setzen.</p></div></article>
+    <article class="pk" data-r data-state="bad" style="--i:1"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Verlauf und klare Farbflächen"><defs><linearGradient id="vl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3c9a8"/><stop offset="1" stop-color="#27465f"/></linearGradient></defs><g class="st-bad"><ellipse cx="100" cy="102" rx="46" ry="8" fill="#2a2622" opacity=".2"/><circle cx="100" cy="56" r="42" fill="url(#vl)"/></g><g class="st-good"><circle cx="100" cy="60" r="44" fill="#27465f"/><circle cx="100" cy="60" r="30" fill="#c8553d"/><circle cx="100" cy="60" r="15" fill="#f3c9a8"/></g></svg></div><div class="pk-text"><h3>Verläufe und Schatten entfernen</h3><p>Für den Anfang gilt: ein Abschnitt, eine Garnfarbe. Verläufe, Filter und halbtransparente Flächen machst du vorher zu klaren Farbflächen.</p></div></article>
+    <article class="pk" data-r data-state="bad" style="--i:2"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Haarlinie und kräftige Linie"><g class="st-bad"><path d="M24 80 C60 20 96 110 176 36" fill="none" stroke="#2a2622" stroke-width=".6"/><text x="100" y="112" font-size="11" text-anchor="middle" fill="#a8432c" font-family="system-ui,sans-serif">0,1 mm</text></g><g class="st-good"><path d="M24 80 C60 20 96 110 176 36" fill="none" stroke="#c8553d" stroke-width="9" stroke-linecap="round"/><text x="100" y="112" font-size="11" text-anchor="middle" fill="#3f6b49" font-family="system-ui,sans-serif">2 bis 3 mm</text></g></svg></div><div class="pk-text"><h3>Linien dick genug zeichnen</h3><p>Eine Haarlinie ist gestickt kaum zu sehen. Auch ein einfacher Laufstich bleibt oft zu dünn. Eine Faustregel für Konturen sind 2 bis 3 mm.</p></div></article>
+    <article class="pk" data-r data-state="bad" style="--i:3"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Winzige Details und große Form"><g class="st-bad" fill="#27465f"><text x="100" y="34" font-size="8" text-anchor="middle" font-family="system-ui,sans-serif">Paul-Klee-Gymnasium Overath</text><g id="ks"><path d="M60 52l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/><path d="M100 52l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/><path d="M140 52l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></g><text x="100" y="94" font-size="8" text-anchor="middle" font-family="system-ui,sans-serif">Fachschaft Physik 2026/27</text></g><g class="st-good"><path d="M100 14l13 28 31 4-23 21 6 31-27-15-27 15 6-31-23-21 31-4z" fill="#27465f"/></g></svg></div><div class="pk-text"><h3>Kleine Details weglassen</h3><p>Das Garn setzt die Grenze. Buchstaben unter etwa 5 mm Höhe werden schlecht lesbar. Winzige Flächen löschst du besser, bevor du digitalisierst.</p></div></article>
+    <article class="pk" data-r data-state="bad" style="--i:4"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Überlappende und zugeschnittene Flächen"><g class="st-bad"><rect x="36" y="20" width="84" height="74" rx="6" fill="#27465f"/><circle cx="124" cy="60" r="40" fill="#c8553d" opacity=".82"/><text x="100" y="114" font-size="11" text-anchor="middle" fill="#a8432c" font-family="system-ui,sans-serif">doppelt gestickt</text></g><g class="st-good"><path d="M42 20h72a6 6 0 0 1 6 6v3.200a40 40 0 0 0-14 54.800l3 10h-67a6 6 0 0 1-6-6v-62a6 6 0 0 1 6-6z" fill="#27465f"/><circle cx="124" cy="60" r="38" fill="#c8553d"/><text x="100" y="114" font-size="11" text-anchor="middle" fill="#3f6b49" font-family="system-ui,sans-serif">verdeckter Teil entfernt</text></g></svg></div><div class="pk-text"><h3>Überlappungen abschneiden</h3><p>Wo Flächen übereinanderliegen, sticht die Nadel mehrfach durch dieselbe Stelle. Brother warnt, dass sie sich dabei verbiegen oder brechen kann. Verdeckte Teile entfernst du in Inkscape mit Pfad &gt; Differenz.</p></div></article>
+    <article class="pk" data-r data-state="bad" style="--i:5"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Motiv ohne und mit festgelegter Größe"><g class="st-bad"><rect x="34" y="20" width="90" height="74" rx="6" fill="none" stroke="#8d8373" stroke-width="2"/><rect x="62" y="12" width="110" height="92" rx="8" fill="#c8553d" opacity=".85"/><text x="117" y="66" font-size="24" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">?</text></g><g class="st-good"><rect x="44" y="12" width="96" height="84" rx="7" fill="none" stroke="#27465f" stroke-width="2.4"/><rect x="66" y="30" width="52" height="48" rx="5" fill="#c8553d"/><path d="M66 108h52M66 103v10M118 103v10" stroke="#3f6b49" stroke-width="2"/><text x="146" y="112" font-size="11" fill="#3f6b49" font-family="system-ui,sans-serif">60 mm</text></g></svg></div><div class="pk-text"><h3>Echte Größe in Millimetern festlegen</h3><p>Eine SVG lässt sich beliebig skalieren, eine Stickerei nicht. Das größte Stickfeld hat 300 × 200 mm, der kleine Rahmen 100 × 100 mm. Eine fertige Maschinendatei sollte man ohne neue Stichberechnung höchstens um 10 Prozent verändern.</p></div></article>
+    <article class="pk" data-r data-state="bad" style="--i:6"><div class="pk-bild"><svg viewBox="0 0 200 120" role="img" aria-label="Viele und wenige Garnfarben"><g class="st-bad"><g><rect x="24" y="22" width="12" height="60" rx="6" fill="#c8553d"/><rect x="39" y="22" width="12" height="60" rx="6" fill="#e0983c"/><rect x="54" y="22" width="12" height="60" rx="6" fill="#d9c04a"/><rect x="69" y="22" width="12" height="60" rx="6" fill="#6f8f72"/><rect x="84" y="22" width="12" height="60" rx="6" fill="#3f8a7f"/><rect x="99" y="22" width="12" height="60" rx="6" fill="#4b86b4"/><rect x="114" y="22" width="12" height="60" rx="6" fill="#27465f"/><rect x="129" y="22" width="12" height="60" rx="6" fill="#6d4f8f"/><rect x="144" y="22" width="12" height="60" rx="6" fill="#b4598f"/><rect x="159" y="22" width="12" height="60" rx="6" fill="#2a2622"/></g><text x="100" y="106" font-size="11" text-anchor="middle" fill="#a8432c" font-family="system-ui,sans-serif">10 Farben, 9 Mal neu einfädeln</text></g><g class="st-good"><rect x="72" y="22" width="20" height="60" rx="10" fill="#c8553d"/><rect x="108" y="22" width="20" height="60" rx="10" fill="#27465f"/><text x="100" y="106" font-size="11" text-anchor="middle" fill="#3f6b49" font-family="system-ui,sans-serif">2 Farben, 1 Mal neu einfädeln</text></g></svg></div><div class="pk-text"><h3>Wenige Farben wählen</h3><p>Die PR1X hat eine Nadel. Nach jeder Farbe stoppt sie, und jemand fädelt neu ein. Für den Einstieg reichen ein bis drei Farben.</p></div></article>
+  </div>
+  <h3 class="kl" data-r>Kurzcheck vor dem Umwandeln</h3>
+  <ul class="check" id="check-svg" data-r>
+    <li><label><input type="checkbox"><span>Text ist in Pfade umgewandelt.</span></label></li>
+    <li><label><input type="checkbox"><span>Es gibt nur klare Farbflächen.</span></label></li>
+    <li><label><input type="checkbox"><span>Verdeckte Teile sind abgeschnitten.</span></label></li>
+    <li><label><input type="checkbox"><span>Dokument und Motiv haben die echte Größe.</span></label></li>
+    <li><label><input type="checkbox"><span>Das Motiv passt in den Rahmen, den du benutzt.</span></label></li>
+  </ul>
+  <button class="klein" data-reset="check-svg">Haken löschen</button>
+</section>
+
+<section class="ab dunkel" id="datei">
+  <h2 data-r>Stickdatei erzeugen</h2>
+  <p class="breit" data-r>Jetzt bekommt jede Form einen Stichtyp. Wähle unten einen aus und schau zu, wie die Nadel die Form abarbeitet.</p>
+  <div class="demo" id="demo" data-r>
+    <div class="demo-feld"><svg id="demo-svg" viewBox="0 0 420 240" role="img" aria-label="Animation: Eine Blattform wird mit Stichen gefüllt"></svg></div>
+    <div class="demo-seite">
+      <div class="seg" role="group" aria-label="Stichtyp">
+        <button data-m="linie" aria-pressed="false">Laufstich</button>
+        <button data-m="satin" aria-pressed="true">Satin</button>
+        <button data-m="fuell" aria-pressed="false">Füllstich</button>
+      </div>
+      <p id="demo-text" aria-live="polite"></p>
+      <button class="klein hell" id="demo-neu">Noch einmal</button>
+    </div>
+  </div>
+  <p class="breit" data-r>Zwei Einstellungen sieht man auf dem Bildschirm kaum. Die <b>Unterlage</b> sind Stiche unter der Fläche. Sie hält den Stoff, sonst sinkt die Stickerei ein. Die <b>Zugkompensation</b> macht Flächen etwas breiter, weil das Garn den Stoff zusammenzieht. Ist sie zu klein, entstehen Lücken am Rand.</p>
+
+  <div class="tabs" id="tabs" data-r>
+    <div class="tabliste" role="tablist" aria-label="Programm">
+      <span class="tabmarke" aria-hidden="true"></span>
+      <button role="tab" id="t-creator" aria-controls="p-creator" aria-selected="true">BERNINA Creator</button>
+      <button role="tab" id="t-ink" aria-controls="p-ink" aria-selected="false" tabindex="-1">Ink/Stitch</button>
+    </div>
+    <div class="tabfeld" id="p-creator" role="tabpanel" aria-labelledby="t-creator">
+      <p class="warn"><b>Der Haken bei Creator:</b> CorelDRAW SE und damit die Zeichenfläche für Vektoren gehört laut BERNINA zum größeren Paket DesignerPlus. In Creator dient deine Grafik deshalb als Vorlage. Ob deine Version SVG annimmt, zeigt der Dateifilter im Dialog. Das konnten wir noch nicht testen.</p>
+      <ol class="zahl">
+        <li>Wähle Datei &gt; Bildvorlage einfügen. Fehlt SVG in der Liste, exportierst du die SVG in Inkscape als PNG: weißer Hintergrund, klare Farben, rund 1200 Pixel Breite pro 100 mm.</li>
+        <li>Stelle den Rahmen ein und bringe die Vorlage auf die Endgröße.</li>
+        <li>Digitalisiere automatisch und bessere nach, oder zeichne die Formen von Hand nach.</li>
+        <li>Prüfe Stichtypen, Farben und Reihenfolge: große Flächen zuerst, Konturen zuletzt.</li>
+        <li>Speichere die Arbeitsdatei als <code>.ART</code>. Nur sie bleibt später gut bearbeitbar.</li>
+        <li>Wähle Datei &gt; Maschinendatei exportieren und stelle <code>.PES</code> ein. „Speichern unter“ reicht dafür nicht.</li>
+      </ol>
+      <p class="fuss">Creator läuft unter Windows. Auf dem Mac geht es laut BERNINA nur mit Intel-Prozessor und Boot Camp, virtuelle Maschinen werden nicht unterstützt.</p>
+    </div>
+    <div class="tabfeld" id="p-ink" role="tabpanel" aria-labelledby="t-ink" hidden>
+      <p class="warn"><b>Der Vorteil:</b> Ink/Stitch ist eine kostenlose Erweiterung für Inkscape und arbeitet direkt mit SVG. Es läuft auch auf dem Mac, einschließlich Apple Silicon. Dafür musst du mehr von Hand einstellen.</p>
+      <ol class="zahl">
+        <li>Installiere zuerst Inkscape und dann Ink/Stitch. Öffne deine SVG in Inkscape.</li>
+        <li>Fläche mit Füllfarbe wird zum Füllstich, ein Pfad mit Konturfarbe zum Laufstich. Für Satin gibt es eigene Werkzeuge unter Tools: Satin.</li>
+        <li>Lege die Reihenfolge der Objekte fest. Sie bestimmt die Stickreihenfolge.</li>
+        <li>Stelle die Werte unter Erweiterungen &gt; Ink/Stitch &gt; Params ein.</li>
+        <li>Starte bei Fehlermeldungen Ink/Stitch &gt; Troubleshoot &gt; Troubleshoot Objects. Das Werkzeug zeigt die Stelle im Motiv.</li>
+        <li>Speichere die SVG und exportiere über Datei &gt; Kopie speichern als <code>.pes</code>.</li>
+      </ol>
+    </div>
+    <p class="fuss">Brother warnt, dass Dateien aus Fremdprogrammen Störungen auslösen können. Das gilt für beide Wege. Sticke deshalb jede neue Datei zuerst zur Probe.</p>
+  </div>
+</section>
+
+<section class="ab" id="usb">
+  <div class="kopf">
+    <div>
+      <h2 data-r>Auf den USB-Stick</h2>
+      <p data-r>Die PR1X hat laut Handbuch nur USB als Schnittstelle, kein WLAN. Wird der Stick nicht erkannt, liegt es oft am Format.</p>
+      <div class="flug" id="flug" aria-hidden="true"><span class="flug-datei">motiv.pes</span><span class="flug-stick"><i></i></span><span class="flug-ok">gelesen</span></div>
+    </div>
+    <figure class="bild" data-bild><img src="bilder/04-usb.webp" loading="lazy" width="1400" height="933" alt="Illustration einer Hand, die einen USB-Stick an eine Maschine steckt"></figure>
+  </div>
+  <div class="regeln">
+    <div data-r><h3>Das steht im PR1X-Handbuch</h3>
+      <ul>
+        <li>Stecke den Stick direkt in die USB-Buchse der Maschine.</li>
+        <li>Nicht jeder handelsübliche Stick funktioniert. Halte einen zweiten bereit.</li>
+        <li>Die Maschine kann Ordner auf dem Stick öffnen. Am einfachsten liegt die Datei trotzdem ganz oben.</li>
+        <li>Per USB-Kabel geht es von Windows 8.1, 10 und 11 aus. Lege dort keine Ordner an, sonst findet die Maschine die Datei nicht.</li>
+        <li>Bei <code>.dst</code> fehlen Garnfarben und Vorschaubild. Nimm <code>.pes</code>.</li>
+      </ul>
+    </div>
+    <div data-r><h3>Das sind Erfahrungswerte</h3>
+      <ul>
+        <li>Formatiere den Stick als FAT32. Auf dem Mac heißt das im Festplattendienstprogramm „MS-DOS (FAT)“. Danach sind die Daten auf dem Stick weg.</li>
+        <li>Ein kleiner USB-2.0-Stick ist oft die bessere Wahl. Anleitungen anderer Brother-Modelle nennen 2 bis 4 GB als Grenze.</li>
+        <li>Lege nur Stickdateien auf den Stick, und wirf ihn am Rechner aus, bevor du ihn abziehst.</li>
+        <li>Benenne keine Datei von Hand in <code>.pes</code> um. Dadurch wird nichts umgewandelt.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="ab" id="maschine">
+  <div class="kopf umgekehrt">
+    <figure class="bild" data-bild><img src="bilder/05-rahmen.webp" loading="lazy" width="1400" height="933" alt="Illustration von zwei Händen, die Stoff und Vlies in einen Rahmen spannen"></figure>
+    <div>
+      <h2 data-r>An der Maschine</h2>
+      <p data-r>Der Stoff gehört straff in den Rahmen, mit Vlies darunter. Tippst du ihn an, klingt er wie eine Trommel. Für den Einstieg eignet sich Filz mit Reißvlies.</p>
+    </div>
+  </div>
+  <ol class="ablauf">
+    <li data-r style="--i:0">Muster vom Stick laden. Das Display zeigt Größe, Stichzahl und Farbfolge.</li>
+    <li data-r style="--i:1">Einen Rahmen nehmen, den das Display für dieses Muster anbietet, und einrasten.</li>
+    <li data-r style="--i:2">Mit dem Laser-Kreuz prüfen, wo die Nadel einsticht. Die Testtaste fährt den Außenrand des Musters ab.</li>
+    <li data-r style="--i:3">Probe auf Reststoff sticken, mit demselben Stoff, Vlies und Garn.</li>
+    <li data-r style="--i:4">Maschine am Display entsperren und die grün blinkende Starttaste drücken. Nach jeder Farbe neu einfädeln.</li>
+  </ol>
+  <details class="schema" data-r><summary>Schema der Maschine anzeigen</summary><div class="schema-bild"><svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schema der Einnadel-Stickmaschine Brother PR1X mit beschrifteten Bauteilen">
+<style>
+  .geraet-lbl{font-family:system-ui,'Segoe UI',sans-serif;font-size:16px;fill:#22201c}
+  .geraet-lbl2{font-family:system-ui,'Segoe UI',sans-serif;font-size:13.5px;fill:#6b6459}
+  .geraet-num{font-family:system-ui,'Segoe UI',sans-serif;font-size:13px;font-weight:700;fill:#fff}
+  .geraet-body{fill:#fff;stroke:#3a5a78;stroke-width:2.4}
+  .geraet-soft{fill:#eceff3;stroke:#8a9bad;stroke-width:2}
+</style>
+
+<rect x="60" y="360" width="480" height="32" rx="8" class="geraet-body"/>
+<rect x="86" y="392" width="40" height="16" rx="4" class="geraet-soft"/>
+<rect x="474" y="392" width="40" height="16" rx="4" class="geraet-soft"/>
+
+<rect x="420" y="140" width="112" height="222" rx="10" class="geraet-body"/>
+
+<rect x="150" y="140" width="276" height="46" rx="10" class="geraet-body"/>
+
+<rect x="150" y="178" width="64" height="74" rx="8" class="geraet-body"/>
+<line x1="182" y1="252" x2="182" y2="288" stroke="#22201c" stroke-width="2.6" stroke-linecap="round"/>
+<circle cx="182" cy="292" r="5" fill="none" stroke="#22201c" stroke-width="2.2"/>
+
+<rect x="392" y="120" width="168" height="14" rx="5" class="geraet-soft"/>
+<g fill="#e3e9ef" stroke="#8a9bad" stroke-width="2">
+  <rect x="404" y="72" width="20" height="48" rx="9"/>
+  <rect x="436" y="72" width="20" height="48" rx="9"/>
+  <rect x="468" y="72" width="20" height="48" rx="9"/>
+  <rect x="500" y="72" width="20" height="48" rx="9"/>
+</g>
+<rect x="532" y="94" width="22" height="26" rx="5" fill="#fdf3e0" stroke="#c9821a" stroke-width="2"/>
+
+<rect x="436" y="196" width="88" height="66" rx="6" fill="#2b3f54" stroke="#3a5a78" stroke-width="2.4"/>
+<rect x="446" y="208" width="44" height="7" rx="3.5" fill="#7f9bb4"/>
+<rect x="446" y="222" width="60" height="7" rx="3.5" fill="#7f9bb4"/>
+<rect x="446" y="236" width="34" height="7" rx="3.5" fill="#c9821a"/>
+
+<rect x="436" y="286" width="30" height="16" rx="3" class="geraet-soft"/>
+
+<rect x="110" y="330" width="412" height="30" rx="8" fill="#eceff3" stroke="#3a5a78" stroke-width="2.4"/>
+<rect x="130" y="290" width="270" height="22" rx="11" fill="#f4f1ea" stroke="#3a5a78" stroke-width="2.4"/>
+<rect x="142" y="296" width="246" height="10" rx="5" fill="#dcd5c6"/>
+
+<path d="M150 322 L150 352" stroke="#c9821a" stroke-width="2" stroke-dasharray="5 5"/>
+<path d="M380 322 L380 352" stroke="#c9821a" stroke-width="2" stroke-dasharray="5 5"/>
+<path d="M156 337 L374 337" stroke="#c9821a" stroke-width="2" stroke-dasharray="6 6"/>
+
+<g>
+  <circle cx="378" cy="98" r="13" fill="#3a5a78"/><text x="378" y="103" class="geraet-num" text-anchor="middle">1</text>
+  <circle cx="570" cy="86" r="13" fill="#3a5a78"/><text x="570" y="91" class="geraet-num" text-anchor="middle">2</text>
+  <circle cx="128" cy="196" r="13" fill="#3a5a78"/><text x="128" y="201" class="geraet-num" text-anchor="middle">3</text>
+  <circle cx="110" cy="276" r="13" fill="#3a5a78"/><text x="110" y="281" class="geraet-num" text-anchor="middle">4</text>
+  <circle cx="88" cy="345" r="13" fill="#3a5a78"/><text x="88" y="350" class="geraet-num" text-anchor="middle">5</text>
+  <circle cx="265" cy="337" r="13" fill="#c9821a"/><text x="265" y="342" class="geraet-num" text-anchor="middle">6</text>
+  <circle cx="548" cy="229" r="13" fill="#3a5a78"/><text x="548" y="234" class="geraet-num" text-anchor="middle">7</text>
+  <circle cx="412" cy="294" r="13" fill="#3a5a78"/><text x="412" y="299" class="geraet-num" text-anchor="middle">8</text>
+</g>
+
+<g>
+  <circle cx="620" cy="64" r="12" fill="#3a5a78"/><text x="620" y="69" class="geraet-num" text-anchor="middle">1</text>
+  <text x="644" y="62" class="geraet-lbl">Garnrollenhalter</text><text x="644" y="80" class="geraet-lbl2">Platz für 4 Garnrollen</text>
+  <circle cx="620" cy="118" r="12" fill="#3a5a78"/><text x="620" y="123" class="geraet-num" text-anchor="middle">2</text>
+  <text x="644" y="116" class="geraet-lbl">Spuler</text><text x="644" y="134" class="geraet-lbl2">wickelt Unterfaden, auch beim Sticken</text>
+  <circle cx="620" cy="172" r="12" fill="#3a5a78"/><text x="620" y="177" class="geraet-num" text-anchor="middle">3</text>
+  <text x="644" y="170" class="geraet-lbl">Nadelkopf</text><text x="644" y="188" class="geraet-lbl2">eine Nadel, automatischer Einfädler</text>
+  <circle cx="620" cy="226" r="12" fill="#3a5a78"/><text x="620" y="231" class="geraet-num" text-anchor="middle">4</text>
+  <text x="644" y="224" class="geraet-lbl">Stickrahmen</text><text x="644" y="242" class="geraet-lbl2">Stickfläche 300 × 200 mm</text>
+  <circle cx="620" cy="280" r="12" fill="#3a5a78"/><text x="620" y="285" class="geraet-num" text-anchor="middle">5</text>
+  <text x="644" y="278" class="geraet-lbl">Stickwagen</text><text x="644" y="296" class="geraet-lbl2">bewegt den Rahmen in x und y</text>
+  <circle cx="620" cy="334" r="12" fill="#c9821a"/><text x="620" y="339" class="geraet-num" text-anchor="middle">6</text>
+  <text x="644" y="332" class="geraet-lbl">Freiarm</text><text x="644" y="350" class="geraet-lbl2">offen, ein Shirt passt darüber</text>
+  <circle cx="620" cy="388" r="12" fill="#3a5a78"/><text x="620" y="393" class="geraet-num" text-anchor="middle">7</text>
+  <text x="644" y="386" class="geraet-lbl">Touchscreen, 7 Zoll</text><text x="644" y="404" class="geraet-lbl2">laden, positionieren, Farben sortieren</text>
+  <circle cx="620" cy="432" r="12" fill="#3a5a78"/><text x="620" y="437" class="geraet-num" text-anchor="middle">8</text>
+  <text x="644" y="430" class="geraet-lbl">USB-Anschluss</text>
+</g>
+</svg><p class="fuss">Vereinfachte Zeichnung, kein Produktfoto.</p></div></details>
+  <figure class="bild breitbild" data-bild><img src="bilder/07-proben.webp" loading="lazy" width="1400" height="696" alt="Illustration von fünf Probestücken, die von links nach rechts sauberer werden"></figure>
+</section>
+
+<section class="ab" id="klemmt">
+  <div class="kopf">
+    <div>
+      <h2 data-r>Wenn es klemmt</h2>
+      <p data-r>Such dein Problem heraus. Die Antworten sind nach dem Ort sortiert, an dem es auffällt.</p>
+    </div>
+    <figure class="bild" data-bild><img src="bilder/06-fadennest.webp" loading="lazy" width="1400" height="933" alt="Illustration eines Fadennests mit verbogener Nadel, Schere und Pinzette"></figure>
+  </div>
+  <div class="fehler">
+    <h3 data-r>Am Rechner</h3>
+    <div class="ak" data-r>
+      <button aria-expanded="false">Creator bietet SVG nicht an</button><div><div><p>Exportiere die Grafik in Inkscape als PNG und füge sie als Bildvorlage ein. Oder nimm Ink/Stitch.</p></div></div>
+      <button aria-expanded="false">Die Buchstaben sehen anders aus</button><div><div><p>Die Schriftart fehlt auf diesem Rechner. Wandle den Text in Pfade um oder setze ihn neu im Stickprogramm.</p></div></div>
+      <button aria-expanded="false">Automatisches Digitalisieren liefert Unsinn</button><div><div><p>Meist ist die Vorlage zu unruhig. Nimm klare Farbflächen und weniger Details. BERNINA nennt selbst Grenzen der Automatik. Korrigiere danach von Hand.</p></div></div>
+      <button aria-expanded="false">Ink/Stitch meldet einen Fehler</button><div><div><p>Starte Troubleshoot Objects. Es markiert die Stelle und schlägt eine Lösung vor. Danach die neue Ebene mit den Hinweisen löschen.</p></div></div>
+    </div>
+    <h3 data-r>Am Stick</h3>
+    <div class="ak" data-r>
+      <button aria-expanded="false">Die Maschine findet keine Datei</button><div><div><p>Sieh nach, ob die Endung wirklich <code>.pes</code> ist und ob die Datei in einem Ordner liegt. Formatiere den Stick als FAT32 oder probiere einen kleineren Stick.</p></div></div>
+      <button aria-expanded="false">Meldung: Datei kann nicht verwendet werden</button><div><div><p>Das Format passt laut Handbuch nicht zur Maschine. Exportiere neu als <code>.pes</code>. Hilft das nicht, probiere in deinem Programm eine ältere PES-Version, falls es eine anbietet.</p></div></div>
+      <button aria-expanded="false">Kein Vorschaubild, falsche Farben</button><div><div><p>Das ist typisch für <code>.dst</code>. Diese Dateien enthalten keine Garnfarben. Die Farben stellst du an der Maschine um.</p></div></div>
+    </div>
+    <h3 data-r>An der Maschine</h3>
+    <div class="ak" data-r>
+      <button aria-expanded="false">Das Muster ist zu groß oder der Rahmen dunkel</button><div><div><p>Das Motiv passt nicht in den eingesetzten Rahmen. Nimm einen größeren oder verkleinere das Motiv in der Arbeitsdatei und exportiere neu.</p></div></div>
+      <button aria-expanded="false">Lücken am Rand, Motiv verzogen</button><div><div><p>Prüfe zuerst Vlies und Spannung. Bleibt es, erhöhe im Programm Zugkompensation und Unterlage und exportiere neu.</p></div></div>
+      <button aria-expanded="false">Der Faden reißt</button><div><div><p>Die Maschine stoppt von selbst. Fädle neu ein und geh am Display einige Stiche zurück. Reißt er wieder, prüfe Nadel und Garn und senke die Geschwindigkeit.</p></div></div>
+      <button aria-expanded="false">Die Nadel bricht</button><div><div><p>Maschine ausschalten und alle Bruchstücke suchen. Häufige Ursachen sind eine verbogene Nadel, dichte Überlappungen, fehlendes Vlies oder ein falscher Rahmen.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="ab" id="quellen">
+  <h2 data-r>Quellen</h2>
+  <p class="breit">Der komplette Weg von Creator bis zur Maschine ist noch nicht am Gerät getestet. Die Bezeichnungen stammen aus dem portugiesischen Brother-Handbuch, am deutschen Display können sie anders lauten. Die Faustregeln für Linien und Buchstaben sind keine Angaben von Brother.</p>
+  <ul class="quellen">
+    <li><a href="https://download.brother.com/welcome/doch102893/882t52_pr1x_om01brpt.pdf" target="_blank" rel="noopener">Brother: Handbuch PR1X (portugiesisch)</a></li>
+    <li><a href="https://www.naehwelt.de/media/af/7d/cb/1699887071/PR1X-Leaflet-2023-DE-web.pdf" target="_blank" rel="noopener">Brother: Prospekt PR1X</a></li>
+    <li><a href="https://www.bernina.com/BERNINA/media/Support/Software/Embroidery_Software/V9/Documents/DE/01_QuickStartGuide_Deu.pdf" target="_blank" rel="noopener">BERNINA: Quick Start Guide V9</a></li>
+    <li><a href="https://softwarehelp.bernina.com/en/downloads/ReleaseNotes.pdf" target="_blank" rel="noopener">BERNINA: Release Notes V9, Vergleich der Pakete</a></li>
+    <li><a href="https://softwarehelp.bernina.com/en/MainHelp/PART_Processing/machine_files/machine_files-4.htm" target="_blank" rel="noopener">BERNINA-Hilfe: Maschinendatei exportieren</a></li>
+    <li><a href="https://softwarehelp.bernina.com/en/MainHelp/PART_Processing/machine_files/machine_files-2.htm" target="_blank" rel="noopener">BERNINA-Hilfe: Maschinendateien skalieren</a></li>
+    <li><a href="https://inkstitch.org/docs/import-export/" target="_blank" rel="noopener">Ink/Stitch: Export</a></li>
+    <li><a href="https://inkstitch.org/docs/troubleshoot/" target="_blank" rel="noopener">Ink/Stitch: Troubleshoot</a></li>
+    <li><a href="https://inkstitch.org/docs/install-macos/" target="_blank" rel="noopener">Ink/Stitch: Installation auf dem Mac</a></li>
+    <li><a href="https://edutechwiki.unige.ch/en/InkStitch_-_stitch_files_from_Noun_Project_icons" target="_blank" rel="noopener">EduTech Wiki: SVG-Icons in Stickdateien umwandeln</a></li>
+    <li><a href="https://manualsnet.com/brother/pe-770-feature" target="_blank" rel="noopener">Brother PE-770: Hinweise zum USB-Stick</a></li>
+    <li><a href="https://hoopingstation.com/blogs/articles/your-brother-or-baby-lock-embroidery-machine-can-t-see-usb-designs-fix-the-empty-folder-panic-in-3-minutes" target="_blank" rel="noopener">Hooping Station: USB-Probleme bei Brother</a></li>
+  </ul>
+</section>
+
+</main>
+<footer><p>Die Illustrationen hat ChatGPT erzeugt, sie sind stilisiert und zeigen kein echtes Gerät. Marken gehören ihren Inhabern.</p><p>Für die Kursleitung: <a href="praesentation.html">Präsentation</a> · <a href="https://github.com/erikdahlmann/stickmaschine-fortbildung#readme">Ablauf und Prüfliste</a></p><p>Erik Dahlmann, Stand November 2026 · <!-- rechtliches --><a href="https://erikdahlmann.github.io/impressum.html">Impressum</a> · <a href="https://erikdahlmann.github.io/datenschutz.html">Datenschutz</a><!-- /rechtliches --></p></footer>
+
+<script>
+var Bewegung=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $$=function(s,w){return [].slice.call((w||document).querySelectorAll(s));};
+
+/* Fortschrittsnaht oben. Die Stiche werden freigelegt, nicht gedehnt. */
+var fort=document.querySelector('#fort span');
+function fortschritt(){
+  var h=document.documentElement,m=h.scrollHeight-h.clientHeight,p=m>0?Math.min(1,h.scrollTop/m):0;
+  fort.style.clipPath='inset(0 '+((1-p)*100)+'% 0 0)';
+}
+addEventListener('scroll',fortschritt,{passive:true});addEventListener('resize',fortschritt);fortschritt();
+
+/* Einblenden beim ersten Sichtbarwerden. Läuft die Uhr nicht, zeigt der Wächter alles. */
+var ziele=$$('[data-r],[data-bild],#wegbild,#flug');
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('da');io.unobserve(e.target);}});},{rootMargin:'0px 0px -8% 0px'});
+  ziele.forEach(function(z){io.observe(z);});
+}else{document.documentElement.classList.add('noanim');}
+setTimeout(function(){var z=document.querySelector('h1');if(z&&parseFloat(getComputedStyle(z).opacity)===0)document.documentElement.classList.add('noanim');},1200);
+
+/* Aktiver Abschnitt in der Navigation. */
+var links=$$('nav.toc a');
+if('IntersectionObserver' in window){
+  var nav=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;links.forEach(function(a){var an=a.getAttribute('href')==='#'+e.target.id;a.classList.toggle('an',an);if(an)a.parentNode.parentNode.scrollLeft=a.offsetLeft-20;});});},{rootMargin:'-30% 0px -65% 0px'});
+  $$('section.ab').forEach(function(s){nav.observe(s);});
+}
+
+/* Schalter So nicht / So geht es */
+$$('.pk').forEach(function(k){
+  var b=document.createElement('div');b.className='schalter';b.setAttribute('role','group');b.setAttribute('aria-label','Beispiel umschalten');
+  b.innerHTML='<button data-v="bad" aria-pressed="true">So nicht</button><button data-v="good" aria-pressed="false">So geht es</button>';
+  k.querySelector('.pk-bild').appendChild(b);
+  b.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;k.dataset.state=t.dataset.v;$$('button',b).forEach(function(x){x.setAttribute('aria-pressed',x===t);});});
+});
+
+/* Checkliste. Haken bleiben nur in diesem Browser. */
+function sch(id,n){return 'stick-'+id+'-'+n;}
+$$('.check').forEach(function(l){$$('input',l).forEach(function(b,n){
+  try{if(localStorage.getItem(sch(l.id,n))==='1')b.checked=true;}catch(e){}
+  b.addEventListener('change',function(){try{b.checked?localStorage.setItem(sch(l.id,n),'1'):localStorage.removeItem(sch(l.id,n));}catch(e){}});
+});});
+$$('button[data-reset]').forEach(function(k){k.addEventListener('click',function(){var l=document.getElementById(k.dataset.reset);$$('input',l).forEach(function(b,n){b.checked=false;try{localStorage.removeItem(sch(l.id,n));}catch(e){}});});});
+
+/* Tabs */
+var tabs=$$('[role=tab]'),marke=document.querySelector('.tabmarke');
+function tab(t){tabs.forEach(function(x,i){var an=x===t;x.setAttribute('aria-selected',an);x.tabIndex=an?0:-1;document.getElementById(x.getAttribute('aria-controls')).hidden=!an;if(an)marke.style.transform='translateX('+(i*100)+'%)';});}
+tabs.forEach(function(t,i){t.addEventListener('click',function(){tab(t);});t.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];tab(n);n.focus();}});});
+
+/* Aufklappliste */
+$$('.ak > button').forEach(function(b){b.addEventListener('click',function(){b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')!=='true');});});
+
+/* Stich-Demo: Die Punkte werden berechnet, die Nadel folgt dem Faden. */
+(function(){
+  var svg=document.getElementById('demo-svg');if(!svg)return;
+  var NS='http://www.w3.org/2000/svg',X0=56,X1=364,YM=118,H=86,lauf=0;
+  function w(t){return H*Math.pow(Math.sin(Math.PI*t),.8);}
+  function rand(n,o){var p=[];for(var i=0;i<=n;i++){var t=i/n;p.push([X0+(X1-X0)*t,YM+o*w(t)]);}return p;}
+  var umriss=rand(70,-1).concat(rand(70,1).reverse());
+  function d(p){return 'M'+p.map(function(q){return q[0].toFixed(1)+' '+q[1].toFixed(1);}).join('L');}
+  var form={
+    linie:function(){return umriss;},
+    satin:function(){var p=[],n=62;for(var i=0;i<=n;i++){var t=i/n,x=X0+(X1-X0)*t,g=i%2?1:-1;p.push([x,YM+g*w(t)]);}return p;},
+    fuell:function(){var p=[],r=13,z=0;for(var y=YM-H+7;y<YM+H;y+=r){var s=[];var u=(y-YM)/H,a=Math.abs(u);
+      var lo=0;for(var t=0;t<=.5;t+=.004){if(w(t)/H>=a){lo=t;break;}}
+      if(lo===0&&a>.01)continue;
+      var xa=X0+(X1-X0)*lo,xb=X1-(xa-X0);if(z%2){var c=xa;xa=xb;xb=c;}
+      p.push([xa,y]);var st=(xb-xa)/Math.max(2,Math.round(Math.abs(xb-xa)/26));for(var x=xa+st,k=1;Math.abs(x-xa)<Math.abs(xb-xa);x+=st,k++)p.push([x,y+(k%2?.0:.0)]);p.push([xb,y]);z++;}return p;}
+  };
+  var texte={
+    linie:'Der Laufstich folgt einer Linie. Er eignet sich für Umrisse und feine Striche und verbraucht wenig Garn. In Ink/Stitch entsteht er aus einem Pfad mit Konturfarbe.',
+    satin:'Beim Satinstich läuft der Faden dicht hin und her. Das glänzt und passt zu Buchstaben und schmalen Formen. Faustregel: ab etwa 10 mm Breite lieber Füllstich nehmen.',
+    fuell:'Der Füllstich legt Reihe um Reihe in eine Fläche. Er ist für große Formen gedacht und braucht eine Unterlage, sonst sinkt die Fläche in den Stoff ein.'
+  };
+  var farbe={linie:'#27465f',satin:'#c8553d',fuell:'#3f6b49'},stil={linie:[3.2,'9 4'],satin:[2.2,''],fuell:[2.4,'22 3']};
+  function zeig(m,sofort){
+    lauf++;var id=lauf;svg.innerHTML='';
+    var bas=document.createElementNS(NS,'path');bas.setAttribute('d',d(umriss)+'Z');bas.setAttribute('fill','#fff');bas.setAttribute('stroke','#b7ab97');bas.setAttribute('stroke-width','1.5');bas.setAttribute('stroke-dasharray','5 5');svg.appendChild(bas);
+    var pp=form[m]();
+    var mk=document.createElementNS(NS,'mask');mk.id='mk'+id;var mp=document.createElementNS(NS,'path');mp.setAttribute('d',d(pp));mp.setAttribute('fill','none');mp.setAttribute('stroke','#fff');mp.setAttribute('stroke-width','8');mp.setAttribute('stroke-linejoin','round');mk.setAttribute('maskUnits','userSpaceOnUse');mk.setAttribute('x','0');mk.setAttribute('y','0');mk.setAttribute('width','420');mk.setAttribute('height','240');mk.appendChild(mp);svg.appendChild(mk);
+    var f=document.createElementNS(NS,'path');f.setAttribute('d',d(pp));f.setAttribute('fill','none');f.setAttribute('stroke',farbe[m]);f.setAttribute('stroke-width',stil[m][0]);f.setAttribute('stroke-linecap','round');f.setAttribute('stroke-linejoin','round');if(stil[m][1])f.setAttribute('stroke-dasharray',stil[m][1]);f.setAttribute('mask','url(#mk'+id+')');svg.appendChild(f);
+    document.getElementById('demo-text').textContent=texte[m];
+    var L=mp.getTotalLength();
+    if(sofort||!Bewegung){mp.removeAttribute('stroke-dasharray');return;}
+    mp.setAttribute('stroke-dasharray',L+' '+L);mp.setAttribute('stroke-dashoffset',L);
+    var n=document.createElementNS(NS,'g');n.innerHTML='<line x1="0" y1="-62" x2="0" y2="0" stroke="#2a2622" stroke-width="2.2"/><rect x="-7" y="-92" width="14" height="30" rx="3" fill="#27465f"/><circle cx="0" cy="-1" r="3" fill="none" stroke="#2a2622" stroke-width="1.5"/>';svg.appendChild(n);
+    var dauer=m==='fuell'?4200:3400,t0=null;
+    function schritt(t){if(id!==lauf)return;if(t0===null)t0=t;var p=Math.min(1,(t-t0)/dauer),l=L*p,q=mp.getPointAtLength(l);
+      mp.setAttribute('stroke-dashoffset',L-l);var hub=Math.sin(p*420)*3;n.setAttribute('transform','translate('+q.x.toFixed(1)+' '+(q.y+hub-2).toFixed(1)+')');
+      if(p<1)requestAnimationFrame(schritt);else{n.style.transition='opacity 300ms ease';n.style.opacity=0;}}
+    requestAnimationFrame(schritt);
+  }
+  var knoepfe=$$('.seg button'),aktiv='satin';
+  knoepfe.forEach(function(b){b.addEventListener('click',function(){aktiv=b.dataset.m;knoepfe.forEach(function(x){x.setAttribute('aria-pressed',x===b);});zeig(aktiv);});});
+  document.getElementById('demo-neu').addEventListener('click',function(){zeig(aktiv);});
+  zeig(aktiv,true);
+  if('IntersectionObserver' in window&&Bewegung){var o=new IntersectionObserver(function(e){if(e[0].isIntersecting){o.disconnect();zeig(aktiv);}},{threshold:.4});o.observe(svg);}
+})();
+
+</script>
+</body>
+</html>
