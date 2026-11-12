@@ -2,8 +2,8 @@
 
 Material für eine Fortbildung an der Stickmaschine Brother Entrepreneur One (PR1X).
 
-- [Website für die Teilnehmenden](https://erikdahlmann.github.io/stickmaschine-fortbildung/)
-- [Präsentation](https://erikdahlmann.github.io/stickmaschine-fortbildung/praesentation.html): Pfeiltasten blättern, **S** zeigt die Sprechnotizen, **F** schaltet auf Vollbild.
+- [Website für die Teilnehmenden](https://dm-pkg.de/stickmaschine-fortbildung/)
+- [Präsentation](https://dm-pkg.de/stickmaschine-fortbildung/praesentation.html): Pfeiltasten blättern, **S** zeigt die Sprechnotizen, **F** schaltet auf Vollbild.
 
 ## Ablauf (3,5 Stunden)
 
